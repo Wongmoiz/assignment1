@@ -1,6 +1,6 @@
 import java.awt.*;
 
-public class Car {
+public abstract class Car {
     private int nrDoors;
     private double enginePower;
     private double currentSpeed;
@@ -33,6 +33,33 @@ public class Car {
     public void setColor(Color clr) {
         color = clr;
     }
+
+    public void startEngine() {
+        currentSpeed = 0.1;
+    }
+
+    public void stopEngine() {
+        currentSpeed = 0;
+    }
+
+    public void incrementSpeed(double amount) {
+        currentSpeed = getCurrentSpeed() + speedFactor() * amount;
+    }
+
+    public void decrementSpeed(double amount) {
+        currentSpeed = getCurrentSpeed() - speedFactor() * amount;
+    }
+
+    public void gas(double amount) {
+        incrementSpeed(amount);
+    }
+
+    public void brake(double amount) {
+        decrementSpeed(amount);
+    }
+
+    public abstract double speedFactor();
+
 
 }
 
