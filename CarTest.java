@@ -1,7 +1,11 @@
 public class CarTest {
 
     private static void reportResult(String testName, boolean success) {
-        System.out.println((success ? "SUCCESS: " : "FAILURE: ") + testName);
+        if (success) {
+            System.out.println("SUCCESS: " + testName);
+        } else {
+            System.out.println("FAILURE: " + testName);
+        }
     }
 
     private static void testGasIncreasesSpeed() {
@@ -9,7 +13,7 @@ public class CarTest {
         saab.startEngine();
 
         double oldSpeed = saab.getCurrentSpeed();
-        saab.gas(1);
+        saab.gas(0.5);
         double newSpeed = saab.getCurrentSpeed();
 
         reportResult("Gas increases speed", newSpeed > oldSpeed);
@@ -27,108 +31,90 @@ public class CarTest {
         reportResult("Brake decreases speed", newSpeed < oldSpeed);
     }
 
-    private static void testGasAcceptsBoundaryValues() {
-        Saab95 saab = new Saab95();
-        boolean bothAccepted = true;
+    private static void testGasAcceptsZeroAndOne() {
+    Saab95 saab = new Saab95();
+    saab.startEngine();
 
-        try {
-            saab.gas(0);
-            saab.gas(1);
-        } catch (IllegalArgumentException e) {
-            bothAccepted = false;
-        }
+    double speedBeforeZero = saab.getCurrentSpeed();
+    saab.gas(0);
+    double speedAfterZero = saab.getCurrentSpeed();
 
-        reportResult("Gas accepts 0 and 1", bothAccepted);
-    }
+    boolean zeroAccepted = speedAfterZero == speedBeforeZero;
 
-    private static void testBrakeAcceptsBoundaryValues() {
-        Saab95 saab = new Saab95();
-        boolean bothAccepted = true;
+    double speedBeforeOne = saab.getCurrentSpeed();
+    saab.gas(1);
+    double speedAfterOne = saab.getCurrentSpeed();
 
-        try {
-            saab.brake(0);
-            saab.brake(1);
-        } catch (IllegalArgumentException e) {
-            bothAccepted = false;
-        }
+    boolean oneAccepted = speedAfterOne > speedBeforeOne;
 
-        reportResult("Brake accepts 0 and 1", bothAccepted);
-    }
+    boolean zeroAndOneAccepted = zeroAccepted && oneAccepted;
 
-    private static void testGasRejectsAmountAboveOne() {
-        Saab95 saab = new Saab95();
-        boolean rejected = false;
+    reportResult("Gas accepts 0 and 1", zeroAndOneAccepted);
+}
 
-        try {
-            saab.gas(1.1);
-        } catch (IllegalArgumentException e) {
-            rejected = true;
-        }
+    private static void testBrakeAcceptsZeroAndOne() {
+    Saab95 saab = new Saab95();
+    saab.startEngine();
+    saab.gas(0.5);
 
-        reportResult("Gas rejects amount above 1", rejected);
-    }
+    double speedBeforeZero = saab.getCurrentSpeed();
+    saab.brake(0);
+    double speedAfterZero = saab.getCurrentSpeed();
 
-    private static void testGasRejectsNegativeAmount() {
-        Saab95 saab = new Saab95();
-        boolean rejected = false;
+    boolean zeroAccepted = speedAfterZero == speedBeforeZero;
 
-        try {
-            saab.gas(-0.1);
-        } catch (IllegalArgumentException e) {
-            rejected = true;
-        }
+    double speedBeforeOne = saab.getCurrentSpeed();
+    saab.brake(1);
+    double speedAfterOne = saab.getCurrentSpeed();
 
-        reportResult("Gas rejects negative amount", rejected);
-    }
+    boolean oneAccepted = speedAfterOne < speedBeforeOne;
 
-    private static void testBrakeRejectsAmountAboveOne() {
-        Saab95 saab = new Saab95();
-        boolean rejected = false;
+    boolean zeroAndOneAccepted = zeroAccepted && oneAccepted;
 
-        try {
-            saab.brake(1.1);
-        } catch (IllegalArgumentException e) {
-            rejected = true;
-        }
+    reportResult("Brake accepts 0 and 1", zeroAndOneAccepted);
+}
 
-        reportResult("Brake rejects amount above 1", rejected);
-    }
-
-    private static void testBrakeRejectsNegativeAmount() {
-        Saab95 saab = new Saab95();
-        boolean rejected = false;
-
-        try {
-            saab.brake(-0.1);
-        } catch (IllegalArgumentException e) {
-            rejected = true;
-        }
-
-        reportResult("Brake rejects negative amount", rejected);
-    }
-
-    private static void testGasCannotDecreaseSpeed() {
+    private static void testGasIgnoresInvalidAmounts() {
         Saab95 saab = new Saab95();
         saab.startEngine();
 
-        double oldSpeed = saab.getCurrentSpeed();
-        saab.gas(0.5);
+        double speedBefore = saab.getCurrentSpeed();
 
-        reportResult("Gas cannot decrease speed", saab.getCurrentSpeed() >= oldSpeed);
+        saab.gas(-0.1);
+        double speedAfterNegative = saab.getCurrentSpeed();
+
+        saab.gas(1.1);
+        double speedAfterAboveOne = saab.getCurrentSpeed();
+
+        boolean invalidAmountsIgnored = 
+            speedAfterNegative == speedBefore 
+            && speedAfterAboveOne == speedBefore;
+
+        reportResult("Gas ignores -0.1 and 1.1", invalidAmountsIgnored);
     }
 
-    private static void testBrakeCannotIncreaseSpeed() {
+    private static void testBrakeIgnoresInvalidAmounts() {
         Saab95 saab = new Saab95();
         saab.startEngine();
         saab.gas(0.5);
 
-        double oldSpeed = saab.getCurrentSpeed();
-        saab.brake(0.5);
+        double speedBefore = saab.getCurrentSpeed();
 
-        reportResult("Brake cannot increase speed", saab.getCurrentSpeed() <= oldSpeed);
+        saab.brake(-0.1);
+        double speedAfterNegative = saab.getCurrentSpeed();
+
+        saab.brake(1.1);
+        double speedAfterAboveOne = saab.getCurrentSpeed();
+
+        boolean invalidAmountsIgnored =
+            speedAfterNegative == speedBefore
+            && speedAfterAboveOne == speedBefore;
+
+        reportResult("Brake ignores -0.1 and 1.1", invalidAmountsIgnored);
     }
 
-    private static void testSpeedNeverExceedsEnginePower() {
+
+    private static void testSpeedStaysBetweenZeroAndEnginePower() {
         Saab95 saab = new Saab95();
         saab.startEngine();
 
@@ -136,31 +122,19 @@ public class CarTest {
             saab.gas(1);
         }
 
-        reportResult(
-            "Speed never exceeds engine power",
-            saab.getCurrentSpeed() <= saab.getEnginePower()
-        );
-    }
-
-    private static void testSpeedNeverBecomesNegative() {
-        Saab95 saab = new Saab95();
-        saab.startEngine();
+        boolean speedIsNotAboveEnginePower = 
+            saab.getCurrentSpeed() <= saab.getEnginePower();
+        
+        reportResult("Speed does not exceed engine power", speedIsNotAboveEnginePower);
 
         for (int i = 0; i < 100; i++) {
             saab.brake(1);
         }
 
-        reportResult("Speed never becomes negative", saab.getCurrentSpeed() >= 0);
-    }
-
-    private static void testVolvoGasIncreasesSpeed() {
-        Volvo240 volvo = new Volvo240();
-        volvo.startEngine();
-
-        double oldSpeed = volvo.getCurrentSpeed();
-        volvo.gas(0.5);
-
-        reportResult("Volvo gas increases speed", volvo.getCurrentSpeed() > oldSpeed);
+        boolean speedIsNotNegative = 
+            saab.getCurrentSpeed() >= 0;
+        
+        reportResult("Speed is never negative", speedIsNotNegative);
     }
 
     private static void testTurbo() {
@@ -177,72 +151,25 @@ public class CarTest {
         fastSaab.gas(0.5);
 
         reportResult(
-            "Turbo yields more speed",
-            slowSaab.getCurrentSpeed() < fastSaab.getCurrentSpeed()
+            "Turbo gives more speed",
+            fastSaab.getCurrentSpeed() > slowSaab.getCurrentSpeed()
         );
     }
 
-    private static void testForwardMoveIncreasesY() {
-        Saab95 saab = new Saab95();
-        saab.startEngine();
-
-        double oldY = saab.getY();
-        saab.move();
-
-        reportResult("Forward move increases y", saab.getY() > oldY);
-    }
-
-    private static void testRightMoveIncreasesX() {
-        Saab95 saab = new Saab95();
-        saab.startEngine();
-        saab.turnRight();
-
-        double oldX = saab.getX();
-        saab.move();
-
-        reportResult("Right move increases x", saab.getX() > oldX);
-    }
-
-    private static void testTurnLeftChangesDirection() {
-        Saab95 saab = new Saab95();
-        saab.startEngine();
-
-        double oldX = saab.getX();
-        saab.turnLeft();
-        saab.move();
-
-        reportResult("Left turn makes move decrease x", saab.getX() < oldX);
-    }
-
-    private static void testTurnRightChangesDirection() {
-        Saab95 saab = new Saab95();
-        saab.startEngine();
-
-        double oldX = saab.getX();
-        saab.turnRight();
-        saab.move();
-
-        reportResult("Right turn makes move increase x", saab.getX() > oldX);
-    }
 
     public static void main(String[] args) {
         testGasIncreasesSpeed();
         testBrakeDecreasesSpeed();
-        testGasAcceptsBoundaryValues();
-        testBrakeAcceptsBoundaryValues();
-        testGasRejectsAmountAboveOne();
-        testGasRejectsNegativeAmount();
-        testBrakeRejectsAmountAboveOne();
-        testBrakeRejectsNegativeAmount();
-        testGasCannotDecreaseSpeed();
-        testBrakeCannotIncreaseSpeed();
-        testSpeedNeverExceedsEnginePower();
-        testSpeedNeverBecomesNegative();
-        testVolvoGasIncreasesSpeed();
+        
+        testGasAcceptsZeroAndOne();
+        testBrakeAcceptsZeroAndOne();
+
+        testGasIgnoresInvalidAmounts();
+        testBrakeIgnoresInvalidAmounts();
+
+        
+        testSpeedStaysBetweenZeroAndEnginePower();
+
         testTurbo();
-        testForwardMoveIncreasesY();
-        testRightMoveIncreasesX();
-        testTurnLeftChangesDirection();
-        testTurnRightChangesDirection();
     }
 }

@@ -56,26 +56,32 @@ public abstract class Car implements Movable {
 
     public void gas(double amount) {
         if (amount < 0 || amount > 1) {
-            throw new IllegalArgumentException("gas amount must be in [0, 1]");
+            return;
         }
         incrementSpeed(amount);
     }
 
     public void brake(double amount) {
         if (amount < 0 || amount > 1) {
-            throw new IllegalArgumentException("brake amount must be in [0, 1]");
+            return;
         }
         decrementSpeed(amount);
     }
 
     public void incrementSpeed(double amount) {
         double newSpeed = currentSpeed + speedFactor() * amount;
-        currentSpeed = Math.min(newSpeed, enginePower);
+        if (newSpeed > enginePower) {
+            newSpeed = enginePower;
+        }
+        currentSpeed = newSpeed;
     }
 
     public void decrementSpeed(double amount) {
         double newSpeed = currentSpeed - speedFactor() * amount;
-        currentSpeed = Math.max(newSpeed, 0);
+        if (newSpeed < 0) {
+            newSpeed = 0;
+        }
+            currentSpeed = newSpeed;   
     }
 
     public abstract double speedFactor();
@@ -93,7 +99,7 @@ public abstract class Car implements Movable {
         }
     }
 
-@Override
+    @Override
     public void turnLeft() {
         if (direction == 0) {
             direction = 3;
