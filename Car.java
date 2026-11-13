@@ -80,23 +80,42 @@ public abstract class Car implements Movable {
 
     public abstract double speedFactor();
 
-    @Override
+   @Override
     public void move() {
-        switch (direction) {
-            case 0 -> y += currentSpeed;
-            case 1 -> x += currentSpeed;
-            case 2 -> y -= currentSpeed;
-            case 3 -> x -= currentSpeed;
+        if (direction == 0) {
+            y += currentSpeed;
+        } else if (direction == 1) {
+            x += currentSpeed;
+        } else if (direction == 2) {
+            y -= currentSpeed;
+        } else if (direction == 3) {
+            x -= currentSpeed;
+        }
+    }
+
+@Override
+    public void turnLeft() {
+        if (direction == 0) {
+            direction = 3;
+        } else if (direction == 1) {
+            direction = 0;
+        } else if (direction == 2) {
+            direction = 1;
+        } else if (direction == 3) {
+            direction = 2;
         }
     }
 
     @Override
-    public void turnLeft() {
-        direction = (direction + 3) % 4;
-    }
-
-    @Override
     public void turnRight() {
-        direction = (direction + 1) % 4;
+        if (direction == 0) {
+            direction = 1;
+        } else if (direction == 1) {
+            direction = 2;
+        } else if (direction == 2) {
+            direction = 3;
+        } else if (direction == 3) {
+            direction = 0;
+        }
     }
 }
